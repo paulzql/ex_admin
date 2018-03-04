@@ -38,24 +38,24 @@ defmodule ExAdmin.Mixfile do
 
   defp deps do
     [
-      {:decimal, "~> 1.0"},
-      {:phoenix, "~> 1.3.0-rc"},
-      {:phoenix_html, "~> 2.6"},
+      {:decimal, "~> 1.4"},
+      {:phoenix, "~> 1.3.1"},
+      {:phoenix_html, "~> 2.10"},
       {:ecto, "~> 2.1"},
       {:phoenix_ecto, "~> 3.2"},
       {:postgrex, "~> 0.13", only: :test},
       {:floki, "~> 0.8", only: :test},
       {:cowboy, "~> 1.0"},
-      {:inflex, "~> 1.7"},
-      {:scrivener_ecto, "~> 1.1"},
+      {:inflex, "~> 1.9"},
+      {:scrivener_ecto, "~> 1.3"},
       {:xain, "~> 0.6"},
-      {:csvlixir, "~> 1.0.0"},
-      {:exactor, "~> 2.2.0"},
+      {:csvlixir, "~> 2.0.0"},
+      {:exactor, "~> 2.2.4"},
       {:ex_doc, "~> 0.11", only: :dev},
       {:earmark, "~> 0.1", only: :dev},
       {:ex_queb, "~> 1.0"},
       {:excoveralls, "~> 0.5", only: :test},
-      {:gettext, "~> 0.11"},
+      {:gettext, "~> 0.15"},
       {:hound, "~> 1.0", only: :test}
     ]
   end
