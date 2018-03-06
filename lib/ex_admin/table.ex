@@ -30,16 +30,24 @@ defmodule ExAdmin.Table do
             for field_name <- Map.get(schema, :rows, []) do
               build_field(resource, conn, field_name, fn
                 _contents, {:map, f_name} ->
-                  field_value = case Map.get(resource, f_name) do
-                    nil -> []
-                    value -> value
-                  end
-                  for {k,v} <- field_value do
-                    tr do
-                      value = ExAdmin.Render.to_string(v)
-                      field_header "#{f_name} #{k}"
-                      td ".td-#{parameterize k} #{value}"
-                    end
+                  # field_value = case Map.get(resource, f_name) do
+                  #   nil -> []
+                  #   value -> value
+                  # end
+                  # for {k,v} <- field_value do
+                  #   tr do
+                  #     value = ExAdmin.Render.to_string(v)
+                  #     field_header "#{f_name} #{k}"
+                  #     td ".td-#{parameterize k} #{value}"
+                  #   end
+                  # end
+                  value = case Map.get(resource, f_name) do
+                            nil -> %{}
+                            v -> v
+                          end
+                  tr do
+                    field_header field_name
+                    handle_contents(value, f_name)
                   end
                 contents, f_name ->
                   tr do
@@ -224,6 +232,11 @@ defmodule ExAdmin.Table do
   def handle_contents(%Date{} = dt, field_name) do
     td class: to_class("td-", field_name) do
       text to_string(dt)
+    end
+  end
+  def handle_contents(%{}=data, field_name) do
+    td class: to_class("td-", field_name) do
+      textarea to_string(data), readonly: "readonly", style: "border: 0px", class: "auto-height"
     end
   end
   def handle_contents(%{}, _field_name), do: []

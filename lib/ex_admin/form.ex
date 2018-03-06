@@ -646,16 +646,32 @@ defmodule ExAdmin.Form do
   end
 
   def build_item(conn, %{type: :input, field_type: :map, name: field_name, resource: _resource
-       } = item, resource, model_name, _error) do
+       } = item, resource, model_name, error) do
     Adminlog.debug "build_item 11: #{inspect field_name}"
 
-    schema = get_schema(item, field_name)
     data = Map.get(resource, field_name, model_name) || %{}
 
-    for {field, type} <- schema do
-      build_input(conn, type, field, field_name, data, model_name)
+    with schema when is_list(schema) <- get_schema(item, field_name) do
+      for {field, type} <- schema do
+        build_input(conn, type, field, field_name, data, model_name)
+      end
+      |> Enum.join("\n")
+    else
+      nil ->
+        opts = item[:opts]
+        errors = get_errors(error, field_name)
+        label = get_label(field_name, opts)
+        required = if field_name in (conn.assigns[:ea_required] || []), do: true, else: false
+      {html, _id} = wrap_item(resource, field_name, model_name, label, errors, opts, conn.params, required, fn(ext_name) ->
+          IO.inspect opts
+            [
+              build_control(:map, resource, opts, model_name, field_name, ext_name),
+              build_errors(errors, opts[:hint])
+            ]
+        end)
+        html
+        # build_input(conn, :map, field_name, field_name, data, model_name)
     end
-    |> Enum.join("\n")
   end
 
   def build_item(conn, %{type: :input, field_type: {:array, :map}, name: field_name, resource: _resource} = item, resource, model_name, error) do
@@ -954,11 +970,29 @@ defmodule ExAdmin.Form do
 
   defp get_schema(item, field_name) do
     schema = item[:opts][:schema]
-    unless schema, do: raise("Can't render map without schema #{inspect field_name}")
+    # unless schema, do: raise("Can't render map without schema #{inspect field_name}")
     schema
   end
 
-  def build_input(conn, type, field, field_name, data, model_name, errors \\ nil, index \\ nil) do
+  def build_input(conn, type, field, field_name, data, model_name, errors \\ nil, index \\ nil)
+  def build_input(conn, :map, field, field_name, data, model_name, errors, index) do
+    error = if errors in [nil, [], false], do: "", else: ".has-error"
+    {inx, id} = if is_nil(index) do
+      {"", "#{model_name}_#{field_name}_#{field}"}
+    else
+      {"[#{index}]", "#{model_name}_#{field_name}_#{index}_#{field}"}
+    end
+    name = "#{model_name}[#{field_name}]#{inx}[#{field}]"
+    label = humanize field
+    theme_module(conn, Form).build_map(id, label, index, error, fn class ->
+      data = (data && Poison.encode!(data)) || ""
+      markup do
+        Xain.textarea(data, class: class <> " auto-height", id: id, name: name)
+        build_errors(errors, nil)
+      end
+    end)
+  end
+  def build_input(conn, type, field, field_name, data, model_name, errors, index) do
     field = to_string field
     error = if errors in [nil, [], false], do: "", else: ".has-error"
     {inx, id} = if is_nil(index) do
@@ -969,16 +1003,16 @@ defmodule ExAdmin.Form do
     name = "#{model_name}[#{field_name}]#{inx}[#{field}]"
     label = humanize field
     theme_module(conn, Form).build_map(id, label, index, error, fn class ->
-      markup do
-        []
-        |> Keyword.put(:type, input_type(type))
-        |> Keyword.put(:class, class)
-        |> Keyword.put(:id, id)
-        |> Keyword.put(:name, name)
-        |> Keyword.put(:value, data[field])
-        |> Xain.input
-        build_errors(errors, nil)
-      end
+        markup do
+          []
+          |> Keyword.put(:type, input_type(type))
+          |> Keyword.put(:class, class)
+          |> Keyword.put(:id, id)
+          |> Keyword.put(:name, name)
+          |> Keyword.put(:value, data[field])
+          |> Xain.input
+          build_errors(errors, nil)
+        end
     end)
   end
 
@@ -1040,6 +1074,17 @@ defmodule ExAdmin.Form do
     value = Map.get(resource, field_name, "") |> escape_value
     options = opts
     |> Map.put(:class, "form-control")
+    |> Map.put_new(:name, "#{model_name}[#{field_name}]")
+    |> Map.put_new(:id, ext_name)
+    |> Map.delete(:display)
+    |> Map.to_list
+    Xain.textarea(value, options)
+  end
+
+  def build_control(:map, resource, opts, model_name, field_name, ext_name) do
+    value = Map.get(resource, field_name, "") |> escape_value
+    options = opts
+    |> Map.put(:class, "form-control auto-height")
     |> Map.put_new(:name, "#{model_name}[#{field_name}]")
     |> Map.put_new(:id, ext_name)
     |> Map.delete(:display)

@@ -1,4 +1,11 @@
 alias ExAdmin.Utils
+
+defimpl String.Chars, for: Map do
+  def to_string(map) do
+    Poison.encode!(map, pretty: true)
+  end
+end
+
 defprotocol ExAdmin.Render do
   # @fallback_to_any true
   def to_string(data)
@@ -55,7 +62,7 @@ end
 
 defimpl ExAdmin.Render, for: Map do
   def to_string(map) do
-    Poison.encode! map
+    Poison.encode!(map, pretty: true)
   end
 end
 
@@ -103,6 +110,12 @@ defimpl ExAdmin.Render, for: NaiveDateTime do
   end
 end
 
-# defimpl ExAdmin.Render, for: Any do
-#   def to_string(data), do: "#{inspect data}"
-# end
+defimpl ExAdmin.Render, for: Tuple do
+  def to_string({:map, key}) do
+    String.Chars.to_string(key)
+  end
+end
+
+defimpl ExAdmin.Render, for: Any do
+  def to_string(data), do: "#{inspect data}"
+end

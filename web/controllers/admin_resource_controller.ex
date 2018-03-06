@@ -76,7 +76,7 @@ defmodule ExAdmin.AdminResourceController do
     model = defn.__struct__
     resource = conn.assigns.resource
 
-    changeset = defn.resource_model.changeset(resource, params[defn.resource_name])
+    changeset = defn.resource_model.changeset(resource, parse(defn, params))
     #apply(defn.resource_model, defn.create_changeset, [resource, params[defn.resource_name]])
 
     case ExAdmin.Repo.insert(changeset) do
@@ -94,7 +94,7 @@ defmodule ExAdmin.AdminResourceController do
     resource = conn.assigns.resource
 
     # changeset = apply(defn.resource_model, defn.update_changeset, [resource, params[defn.resource_name]])
-    changeset = defn.resource_model.changeset(resource, params[defn.resource_name])
+    changeset = defn.resource_model.changeset(resource, parse(defn, params))
     case ExAdmin.Repo.update(changeset) do
       {:error, changeset} ->
         conn |> handle_changeset_error(defn, changeset, params)
@@ -263,4 +263,20 @@ defmodule ExAdmin.AdminResourceController do
       %{conn | resp_headers: [{"content-type", content_type}|resp_headers]}
     end
   end
+
+  defp parse(defn, params) do
+    defn.resource_model.__schema__(:types)
+    |> Enum.reduce(params[defn.resource_name], &filter_map/2)
+  end
+
+  defp filter_map({key, :map}, params) do
+    with value when is_binary(value) <- Map.get(params, key),
+         {:ok, json} <- Poison.decode(value) do
+      Map.put(params, key, json)
+    else
+      _ ->
+        params
+    end
+  end
+  defp filter_map(_, params), do: params
 end

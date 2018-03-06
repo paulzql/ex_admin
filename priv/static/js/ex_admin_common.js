@@ -7597,5 +7597,10 @@ $(document).ready(function() {
   $("select.select2").select2();
 });
 
+$(function(){
+    $(".auto-height").each(function() {
+        $(this).height($(this)[0].scrollHeight);
+    });
+});
 
 //# sourceMappingURL=ex_admin_common.js.map
