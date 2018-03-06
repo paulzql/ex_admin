@@ -7599,7 +7599,7 @@ $(document).ready(function() {
 
 $(function(){
     $(".auto-height").each(function() {
-        $(this).height($(this)[0].scrollHeight);
+        $(this).height(Math.min($(this)[0].scrollHeight, 250));
     });
 });
 

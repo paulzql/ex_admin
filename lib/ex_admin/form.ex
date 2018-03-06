@@ -663,7 +663,6 @@ defmodule ExAdmin.Form do
         label = get_label(field_name, opts)
         required = if field_name in (conn.assigns[:ea_required] || []), do: true, else: false
       {html, _id} = wrap_item(resource, field_name, model_name, label, errors, opts, conn.params, required, fn(ext_name) ->
-          IO.inspect opts
             [
               build_control(:map, resource, opts, model_name, field_name, ext_name),
               build_errors(errors, opts[:hint])
