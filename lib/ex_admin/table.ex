@@ -239,7 +239,7 @@ defmodule ExAdmin.Table do
       textarea to_string(data), readonly: "readonly", style: "border: 0px", class: "auto-height"
     end
   end
-  def handle_contents(%{}, _field_name), do: []
+  # def handle_contents(%{}, _field_name), do: []
   def handle_contents(contents, field_name) when is_binary(contents) do
     td(to_class(".td-", field_name)) do
       text contents

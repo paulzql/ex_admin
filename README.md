@@ -98,10 +98,15 @@ defmodule MyProject.Router do
   end
 
   # setup the ExAdmin routes on /admin
+  # two ways can add admin routes
+  # 1. only add controllers routes (static files need copy to priv/static)
   scope "/admin", ExAdmin do
     pipe_through :browser
     admin_routes()
   end
+  
+  # 2. add controllers and static routes (recommend)
+  admin_all_routes("/admin", [:browser])
 ```
 
 Add the paging configuration
@@ -336,6 +341,33 @@ defmodule MyProject.ExAdmin.Question do
   end
 end
 ```
+
+### Add Js plugins in page
+
+support js plugins list on ex_admin dir: priv/static/plugins.
+
+example: `ExAdmin.Plugin.enable("bootstrap-datetimepicker")` this will add plugin's css and js in current page.
+
+```elixir
+defmodule MyProject.ExAdmin.Question do
+  use ExAdmin.Register
+
+  register_resource MyProject.Question do
+    menu priority: 3
+
+    show question do
+      ExAdmin.Plugin.enable("bootstrap-datetimepicker")
+      
+      javascript do
+        """
+        $(".datetime").datetimepicker();
+        """
+      end
+    end
+  end
+end
+```
+
 ## Custom Types
 
 Support for custom field types is done in two areas, rendering fields, and input controls.

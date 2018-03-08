@@ -63,4 +63,23 @@ defmodule ExAdmin.Router do
       get "/:resource/:id/:association_name", AdminAssociationController, :index, as: :admin_association
     end
   end
+
+  defmacro admin_all_routes(path, pipes \\ []) do
+    quote bind_quoted: [path: path, pipes: pipes] do
+      static_path = Path.join(path, "/_static")
+
+      forward static_path, ExAdmin.Plug.Static
+
+      scope path, ExAdmin do
+        pipe_through pipes
+        admin_routes()
+      end
+
+      @static_path static_path
+      def admin_static_path(url) do
+        Path.join(@static_path, url)
+      end
+    end
+  end
+
 end

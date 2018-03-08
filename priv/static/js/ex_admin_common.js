@@ -165,6 +165,14 @@ $(document).ready(function(){
       options = $(this).data('datepicker-options');
       return $(this).datepicker($.extend(defaults, options));
     });
+      $(document).on('focus', '.datetimepicker:not(.hasDatetimepicker)', function() {
+          var defaults, options;
+          defaults = {
+              format: 'yyyy-mm-dd hh:ii:ss'
+          };
+          options = $(this).data('datetimepicker-options');
+          return $(this).datetimepicker($.extend(defaults, options));
+      });
     $('.clear_filters_btn').click(function() {
       var params, regex;
       params = window.location.search.split('&');

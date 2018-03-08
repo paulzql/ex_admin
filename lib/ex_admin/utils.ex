@@ -245,6 +245,14 @@ defmodule ExAdmin.Utils do
     apply(router(), :admin_association_path, [endpoint(), method || :index, resource_model.__schema__(:source), resource_id, assoc_name | args])
   end
 
+  def admin_static_path(%Plug.Conn{private: %{phoenix_router: router}=private}=conn, path) do
+    if :erlang.function_exported(router, :admin_static_path, 1) do
+      router.admin_static_path(path)
+    else
+      private.phoenix_endpoint.static_path(conn, path)
+    end
+  end
+
 
   @doc """
   Returns a list of items from list1 that are not in list2
