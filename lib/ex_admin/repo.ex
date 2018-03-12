@@ -39,17 +39,45 @@ defmodule ExAdmin.Repo do
     end
   end
 
+  defmacrop do_action(action, arg) do
+    quote bind_quoted: [action: action, arg: arg] do
+      if ExAdmin.VirtualSchema.is_virtual(arg) do
+        apply(ExAdmin.VirtualSchema, action, [arg])
+      else
+        apply(repo(), action, [arg])
+      end
+      |> case do
+           {:error, _}=ret ->
+             ret
+           {:ok, data}=ret ->
+             change_callback(action, data)
+             ret
+           ret ->
+             change_callback(action, ret)
+             ret
+         end
+    end
+  end
+
   def delete(resource, _params) do
-    repo().delete resource
+    do_action(:delete, resource)
   end
 
   # V2
   #
   def insert(changeset) do
-    repo.insert(changeset)
+    do_action(:insert, changeset)
   end
 
   def update(changeset) do
-    repo.update(changeset)
+    do_action(:update, changeset)
+  end
+
+  defp change_callback(action, data) do
+    case Application.get_env(:ex_admin, :change_callback) do
+      {module, func} when is_atom(module) and is_atom(func)->
+        apply(module, func, [action, data])
+      _ -> :ok
+    end
   end
 end

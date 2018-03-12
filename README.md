@@ -368,6 +368,60 @@ defmodule MyProject.ExAdmin.Question do
 end
 ```
 
+### Customizing virtual schema
+
+define a virtual schema which not from database. just `use ExAdmin.VirtualSchema` in schema module and implement callbacks.
+
+example:
+
+```
+defmodule AdminTest.Bot do
+  use Ecto.Schema
+  import Ecto.Changeset
+  use ExAdmin.VirtualSchema, page_size: 2
+
+  schema "bots" do
+    field :username, :string
+    field :password, :string
+  end
+
+  @doc false
+  def changeset(user, attrs) do
+    user
+    |> cast(attrs, [:username, :password])
+    |> validate_required([:username, :password])
+  end
+  @impl true
+  def admin_list(page_number, page_size) do
+    {[%AdminTest.Bot{id: 1}], 1}
+  end
+  @impl true
+  def admin_get(id), do: %AdminTest.Bot{id: 1}
+  @impl true
+  def admin_insert(changeset), do: {:ok, %AdminTest.Bot{id: 1}}
+  @impl true
+  def admin_update(changeset), do: {:error, changeset}
+  @impl true
+  def admin_delete(bot), do: :ok
+end
+```
+
+### add data change callback
+
+define data after change callback (not effect on `VirtualSchema` changes)
+
+```
+config :ex_admin, :change_callback, {MyModel, :on_change}
+```
+
+```
+defmodule MyModel do
+ def on_change(:insert, data), do: :ok
+ def on_change(:update, data), do: :ok
+ def on_change(:delete, data), do: :ok
+end
+```
+
 ## Custom Types
 
 Support for custom field types is done in two areas, rendering fields, and input controls.

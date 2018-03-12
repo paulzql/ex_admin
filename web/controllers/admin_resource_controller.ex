@@ -18,6 +18,7 @@ defmodule ExAdmin.AdminResourceController do
       page ->
         page
     end
+
     scope_counts = model.run_query_counts repo(), defn, :index, params |> Map.to_list
 
     {conn, _params, page} = handle_after_filter(conn, :index, defn, params, page)
@@ -134,8 +135,8 @@ defmodule ExAdmin.AdminResourceController do
 
     page_number = params[:page] || page.page_number
     opts = %{
-      href: admin_resource_path(conn, :index) <> "?order=",
-      order: ExQueb.get_sort_order(conn.params["order"])
+      href: admin_resource_path(conn, :index) <> "?_order=",
+      order: ExQueb.get_sort_order(conn.params["_order"])
     }
     model_name = model |> base_name |> titleize
     model_id = model |> base_name |> Inflex.underscore
@@ -169,7 +170,10 @@ defmodule ExAdmin.AdminResourceController do
     ids
     |> Enum.map(&(to_integer(type, &1)))
     |> Enum.each(fn(id) ->
-      repo().delete repo().get(resource_model, id)
+      case ExAdmin.Query.get_by_id(repo(), resource_model, id) do
+        nil -> :ingnore
+        entity -> ExAdmin.Repo.delete(entity, [])
+      end
     end)
 
     put_flash(conn, :notice, "#{count} #{pluralize params[:resource], count} "

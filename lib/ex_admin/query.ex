@@ -20,7 +20,25 @@ defmodule ExAdmin.Query do
   end
 
   def execute_query(query, repo, action, id) do
-    paginate(query, repo, action, id)
+    case {ExAdmin.VirtualSchema.is_virtual(query), action, id} do
+      {false, _, _} ->
+        paginate(query, repo, action, id)
+      {_, :index, _} ->
+        ExAdmin.VirtualSchema.paginate(query, id)
+      {_, _, params} when is_list(params) ->
+        ExAdmin.VirtualSchema.paginate(query, id)
+      _ ->
+        %Ecto.Query{from: {_, model}} = query
+        ExAdmin.VirtualSchema.get(model, id)
+    end
+  end
+
+  def get_by_id(repo, model, id) do
+    if ExAdmin.VirtualSchema.is_virtual(model) do
+      ExAdmin.VirtualSchema.get(model, id)
+    else
+      repo.get(model, id)
+    end
   end
 
   @doc false
