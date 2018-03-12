@@ -55,7 +55,7 @@ mix.exs
 ```elixir
   defp deps do
      ...
-     {:ex_admin, github: "smpallen99/ex_admin", branch: "phx-1.3"},
+     {:ex_admin, github: "paulzql/ex_admin", branch: "new"},
      ...
   end
 ```

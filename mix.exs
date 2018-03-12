@@ -48,7 +48,7 @@ defmodule ExAdmin.Mixfile do
       {:cowboy, "~> 1.0"},
       {:inflex, "~> 1.9"},
       {:scrivener_ecto, "~> 1.3"},
-      {:xain, "~> 0.6"},
+      {:xain, github: "paulzql/xain"},
       {:csvlixir, "~> 2.0.0"},
       {:exactor, "~> 2.2.4"},
       {:ex_doc, "~> 0.11", only: :dev},
