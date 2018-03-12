@@ -416,9 +416,9 @@ config :ex_admin, :change_callback, {MyModel, :on_change}
 
 ```
 defmodule MyModel do
- def on_change(:insert, data), do: :ok
- def on_change(:update, data), do: :ok
- def on_change(:delete, data), do: :ok
+ def on_change(:insert, changeset, data), do: :ok
+ def on_change(:update, changeset, data), do: :ok
+ def on_change(:delete, data, _), do: :ok
 end
 ```
 

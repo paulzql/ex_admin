@@ -50,10 +50,10 @@ defmodule ExAdmin.Repo do
            {:error, _}=ret ->
              ret
            {:ok, data}=ret ->
-             change_callback(action, data)
+             change_callback(action, arg, data)
              ret
            ret ->
-             change_callback(action, ret)
+             change_callback(action, arg, ret)
              ret
          end
     end
@@ -73,10 +73,10 @@ defmodule ExAdmin.Repo do
     do_action(:update, changeset)
   end
 
-  defp change_callback(action, data) do
+  defp change_callback(action, changeset, data) do
     case Application.get_env(:ex_admin, :change_callback) do
       {module, func} when is_atom(module) and is_atom(func)->
-        apply(module, func, [action, data])
+        apply(module, func, [action, changeset, data])
       _ -> :ok
     end
   end
