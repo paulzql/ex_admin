@@ -344,9 +344,9 @@ end
 
 ### Add Js plugins in page
 
-support js plugins list on ex_admin dir: priv/static/plugins.
+support js plugins. default plugins list in ex_admin dir: priv/static/plugins.
 
-example: `ExAdmin.Plugin.enable("bootstrap-datetimepicker")` this will add plugin's css and js in current page.
+example: `ExAdmin.Plugin.enable("bootstrap-datetimepicker")` or `ExAdmin.Plugin.enable("myplugin", "/js/plugins")` this will add plugin's css and js in current page.
 
 ```elixir
 defmodule MyProject.ExAdmin.Question do
@@ -392,7 +392,7 @@ defmodule AdminTest.Bot do
     |> validate_required([:username, :password])
   end
   @impl true
-  def admin_list(page_number, page_size) do
+  def admin_list(query, page_number, page_size) do
     {[%AdminTest.Bot{id: 1}], 1}
   end
   @impl true

@@ -6,7 +6,7 @@ defmodule ExAdmin.VirtualSchema do
 
       def virtual_schema_config, do: @config_defaults
 
-      def admin_list(page_number, page_size) do
+      def admin_list(query, page_number, page_size) do
         {[], 0}
       end
       def admin_get(id), do: nil
@@ -14,7 +14,7 @@ defmodule ExAdmin.VirtualSchema do
       def admin_update(changeset), do: {:error, changeset}
       def admin_delete(entity), do: :ok
 
-      defoverridable [admin_list: 2,
+      defoverridable [admin_list: 3,
                       admin_get: 1,
                       admin_insert: 1,
                       admin_update: 1,
@@ -23,15 +23,18 @@ defmodule ExAdmin.VirtualSchema do
   end
 
 
-  @callback admin_list(page_number :: integer, page_size::integer) :: {[Ecto.Schema.t], integer}
+  @callback admin_list(query :: Ecto.Query.t, page_number :: integer, page_size::integer) :: {[Ecto.Schema.t], integer}
   @callback admin_get(id::integer | binary | float) :: nil | Ecto.Schema.t
   @callback admin_insert(changeset :: Ecto.Changeset.t) :: {:ok, Ecto.Schema.t} | {:error, Ecto.Changeset.t}
   @callback admin_update(changeset :: Ecto.Changeset.t) :: {:ok, Ecto.Schema.t} | {:error, Ecto.Changeset.t}
   @callback admin_delete(entity :: Ecto.Schema.t) :: Any
 
 
-  def paginate(model, %Scrivener.Config{page_size: page_size, page_number: page_number}) do
-    {entries, total_entries} = model.admin_list(page_number, page_size)
+  def paginate(%Ecto.Query{from: {_, model}}=query, options) do
+    %Scrivener.Config{page_size: page_size, page_number: page_number} =
+      Scrivener.Config.new(__MODULE__, model.virtual_schema_config(), options)
+
+    {entries, total_entries} = model.admin_list(query, page_number, page_size)
     total_pages = case total_entries do
                     0 -> 1
                     _ ->
@@ -46,10 +49,6 @@ defmodule ExAdmin.VirtualSchema do
     }
   end
 
-  def paginate(%Ecto.Query{from: {_, model}}, options) do
-    config = Scrivener.Config.new(__MODULE__, model.virtual_schema_config(), options)
-    paginate(model, config)
-  end
 
   def is_virtual(%Ecto.Changeset{data: %{__struct__: model}}) do
     is_virtual(model)
