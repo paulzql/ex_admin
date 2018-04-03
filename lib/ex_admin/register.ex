@@ -596,6 +596,7 @@ defmodule ExAdmin.Register do
 
   * `:only` - Filters the list of actions for the filter.
   * `:except` - Filters out actions in the except atom or list.
+  * ':label` - Box header
 
   ## Examples
 

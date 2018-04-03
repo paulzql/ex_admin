@@ -164,7 +164,9 @@ defmodule ExAdmin.Table do
       th(".th-#{field_name_to_class(field_name)} #{humanize Map.get(opts, :label, to_string(field_name))}")
     end
   end
-  def build_th(field_name, _, _), do: build_th(field_name, nil)
+  def build_th(field_name, opts, _) do
+    th(".th-#{parameterize field_name} #{humanize Map.get(opts, :label, field_name)}")
+  end
 
   def _build_th(field_name, _opts, %{path_prefix: path_prefix, order: {name, sort},
       fields: _fields} = table_opts) when field_name == name do

@@ -79,7 +79,8 @@ defmodule ExAdmin.Theme.ActiveAdmin.Layout do
     end
   end
 
-  def sidebar_view(conn, {name, _opts, {mod, fun}}, resource) do
+  def sidebar_view(conn, {name, opts, {mod, fun}}, resource) do
+    name = Keyword.get(opts, :label, name)
     markup safe: true do
       div "#filters_sidebar_sectionl.sidebar_section.panel" do
         h3 "#{name}"
