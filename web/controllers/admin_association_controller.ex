@@ -12,13 +12,33 @@ defmodule ExAdmin.AdminAssociationController do
   end
 
   def update_positions(conn, defn, resource, %{"association_name" => association_name, "positions" => positions}) do
-    positions = prepare_positions(defn, positions)
-    association_name = String.to_existing_atom(association_name)
+    column = Map.get(defn, :position_column, :position)
+    association_name = String.to_atom(association_name)
+    position_map =
+      positions
+       |> Enum.map(fn {_, %{"id"=>id, "position"=>position}} ->
+         {id, position}
+       end)
+       |> Enum.into(%{})
+    assoc_model = resource.__struct__.__changeset__()[association_name] |> elem(1) |> Map.get(:related)
+    [primary_key] = assoc_model.__schema__(:primary_key)
 
-    resource
-    |> repo().preload(association_name)
-    |> changeset(association_name, positions)
-    |> repo().update!
+    repo().preload(resource, association_name)
+    |> Map.get(association_name)
+    |> Enum.reduce(Ecto.Multi.new(), fn assoc,acc ->
+      id = Map.get(assoc, primary_key) |> to_string
+      old_pos = Map.get(assoc, column)
+      case Map.get(position_map, id) do
+        nil ->
+          acc
+        pos when pos == old_pos ->
+          acc
+        pos ->
+          change = assoc |> Ecto.Changeset.cast(%{column=>pos}, [column])
+          Ecto.Multi.update(acc, id, change)
+      end
+    end)
+    |> repo().transaction
 
     conn |> put_status(200) |> json("Ok")
   end
@@ -59,21 +79,5 @@ defmodule ExAdmin.AdminAssociationController do
   end
 
 
-  defp prepare_positions(%{position_column: nil}, positions), do: positions
-  defp prepare_positions(%{position_column: position_column}, positions) do
-    position_column = to_string(position_column)
-    positions
-    |> Enum.map(fn({idx, %{"id" => id, "position" => position}}) ->
-      {idx, %{"id" => id, position_column => position}}
-    end)
-    |> Enum.into(%{})
-  end
-
-  defp changeset(struct, assoc_name, positions) do
-    struct
-    |> Ecto.Changeset.cast(%{assoc_name => positions}, [], [])
-    |> Ecto.Changeset.cast_assoc(assoc_name)
-  end
-
-  defp repo, do: Application.get_env(:ex_admin, :repo)
+  defp repo, do: ExAdmin.Repo.repo()
 end
