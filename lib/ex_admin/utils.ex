@@ -241,8 +241,9 @@ defmodule ExAdmin.Utils do
   """
   def admin_association_path(resource, assoc_name, method \\ nil, args \\ []) do
     resource_model = resource.__struct__
+    resource_name = resource_model |> ExAdmin.Helpers.model_name |> Inflex.pluralize
     resource_id = ExAdmin.Schema.get_id(resource)
-    apply(router(), :admin_association_path, [endpoint(), method || :index, resource_model.__schema__(:source), resource_id, assoc_name | args])
+    apply(router(), :admin_association_path, [endpoint(), method || :index, resource_name, resource_id, assoc_name | args])
   end
 
   def admin_static_path(%Plug.Conn{private: %{phoenix_router: router}=private}, path) do
