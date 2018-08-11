@@ -5,6 +5,10 @@ defmodule ExAdmin.Theme.AdminLte2.Layout do
   use Xain
   require Logger
 
+  def nav_header(name) do
+    content_tag :li, "#{name}", class: "header"
+  end
+
   def link_to_active(conn, name, path, id, opts \\ []) do
     wrapper = Keyword.get(opts, :wrapper, :li)
     active_class = Keyword.get(opts, :active_class, "active")
@@ -89,7 +93,7 @@ defmodule ExAdmin.Theme.AdminLte2.Layout do
     header_attributes = Keyword.get(opts, :header_attributes, ".box-header.with-border")
     body_attributes = Keyword.get(opts, :body_attributes, ".box-body")
     name = Keyword.get(opts, :label, name)
-    
+
     markup safe: true do
       div box_attributes do
         div header_attributes do

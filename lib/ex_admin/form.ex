@@ -637,7 +637,6 @@ defmodule ExAdmin.Form do
   end
 
 
-  @doc false
   def build_item(_conn, %{type: :script, contents: contents}, _resource, _model_name, _errors) do
     Adminlog.debug "build_item 2:"
     script type: "javascript" do
@@ -942,7 +941,7 @@ defmodule ExAdmin.Form do
     end
   end
 
-  defp build_checkboxes(conn, name, collection, opts, resource, model_name, errors, name_ids) do
+  defp build_checkboxes(conn, name, collection, _opts, resource, model_name, errors, name_ids) do
     theme_module(conn, Form).wrap_collection_check_boxes fn ->
       for opt <- collection do
         opt_id = Schema.get_id(opt)

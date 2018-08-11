@@ -104,7 +104,7 @@ defmodule MyProject.Router do
     pipe_through :browser
     admin_routes()
   end
-  
+
   # 2. add controllers and static routes (recommend)
   admin_all_routes("/admin", [:browser])
 ```
@@ -342,6 +342,23 @@ defmodule MyProject.ExAdmin.Question do
 end
 ```
 
+### Customizing the menu
+
+The following example illustrates how to modify the menu.
+
+```elixir
+defmodule MyProject.ExAdmin.Question do
+  use ExAdmin.Register
+
+  register_resource MyProject.Question do
+    menu priority: 3, # asc order
+         label: "QuestionMenu", # display name (default is resource name)
+         group: "Config", # group menus by `group`, default is nil (not group)
+         none: false, # if `ture` the menu will be hide
+  end
+end
+```
+
 ### Add Js plugins in page
 
 support js plugins. default plugins list in ex_admin dir: priv/static/plugins.
@@ -357,7 +374,7 @@ defmodule MyProject.ExAdmin.Question do
 
     show question do
       ExAdmin.Plugin.enable("bootstrap-datetimepicker")
-      
+
       javascript do
         """
         $(".datetime").datetimepicker();

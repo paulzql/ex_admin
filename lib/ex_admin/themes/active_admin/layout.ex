@@ -6,6 +6,10 @@ defmodule ExAdmin.Theme.ActiveAdmin.Layout do
   require Logger
   use Xain
 
+  def nav_header(name) do
+    content_tag :li, "#{name}", class: "header"
+  end
+
   def link_to_active(conn, name, path, id, _opts \\ []) do
     active_class = if link_active?(conn, path), do: "current", else: ""
 

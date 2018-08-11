@@ -21,9 +21,38 @@ defmodule ExAdmin.Navigation do
       menu1[:priority] < menu2[:priority]
     end)
 
-    for resource <- registered do
-      nav_link(conn, resource, opts)
+    grouped = Enum.reduce(registered, %{}, fn res, ret ->
+      {m, group_name} =
+        case Map.get(res, :menu, %{}) do
+          %{group: name}=m when name != nil ->
+            {m, to_string(name)}
+          m ->
+          {m, nil}
+        end
+      {priority, rest} = Map.get(ret, group_name, {99999999, []})
+      if m[:priority] < priority  do
+        Map.put(ret, group_name, {m[:priority], [res | rest]})
+      else
+        Map.put(ret, group_name, {priority, [res | rest]})
+      end
+    end)
+    |> Enum.sort(fn({priority1, _}, {priority2, _}) ->
+      priority1 < priority2
+    end)
+
+    for {name, {_, res_list}} <- grouped do
+      res_list = res_list
+        |> Enum.sort(fn(%{menu: menu1}, %{menu: menu2}) ->
+          menu1[:priority] < menu2[:priority]
+        end)
+      ret = for resource <- res_list, do: nav_link(conn, resource, opts)
+      if is_nil(name) do
+        ret
+      else
+        [theme_module(conn, Layout).nav_header(name) | ret]
+      end
     end
+
   end
 
   def nav_link(conn, %{controller: controller, type: :page, page_name: page_name} = registered, opts) do
