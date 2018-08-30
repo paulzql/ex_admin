@@ -70,7 +70,7 @@ defmodule ExAdmin.Theme.ActiveAdmin.Index do
             table(".index_grid", border: "0", cellspacing: "0",
                 cellpadding: "0", paginator: "true") do
               tbody do
-                Enum.chunk(page.entries, columns, columns, [nil])
+                Enum.chunk_every(page.entries, columns, columns, [nil])
                 |> Enum.map(fn(list) ->
                   tr do
                     Enum.map(list, fn(item) ->

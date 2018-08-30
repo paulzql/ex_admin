@@ -246,7 +246,7 @@ defmodule ExAdmin.Index do
         |> case do
           [] ->
             defn.resource_model.__schema__(:fields)
-            |> Enum.filter(&(not &1 in [:inserted_at, :updated_at]))
+            |> Enum.filter(&(not(&1 in [:inserted_at, :updated_at])))
           other ->
             other
         end
@@ -279,7 +279,7 @@ defmodule ExAdmin.Index do
     name = resource_model(conn) |> titleize |> Inflex.pluralize
     defn = conn.assigns.defn
     label = get_resource_label(conn) |> Inflex.pluralize
-    batch_actions = (not false in defn.batch_actions) and :delete in page_opts[:actions]
+    batch_actions = (not(false in defn.batch_actions)) and :delete in page_opts[:actions]
     opts = %{
       columns: Map.get(page_opts, :columns, 3),
       column_list: Map.get(page_opts, :column_list),

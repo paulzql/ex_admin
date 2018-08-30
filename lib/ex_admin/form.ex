@@ -1458,7 +1458,7 @@ defmodule ExAdmin.Form do
         throw :invalid_route
       %{__struct__: _} = defn ->
         columns = defn.resource_model.__schema__(:fields)
-        |> Enum.filter(&(not &1 in [:id, :inserted_at, :updated_at]))
+        |> Enum.filter(&(not(&1 in [:id, :inserted_at, :updated_at])))
         |> Enum.map(&(build_item resource, defn, &1))
         |> Enum.filter(&(not is_nil(&1)))
         items = [%{type: :inputs, name: "", inputs: columns, opts: []}]
