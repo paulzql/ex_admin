@@ -41,6 +41,7 @@ config :ex_admin,
 config :phoenix, :template_engines,
           haml: PhoenixHaml.Engine,
           eex: Phoenix.Template.EExEngine
+config :phoenix, :json_library, Jason
 
 # Sample configuration:
 #

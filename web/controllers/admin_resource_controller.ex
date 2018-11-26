@@ -275,7 +275,7 @@ defmodule ExAdmin.AdminResourceController do
 
   defp filter_map({key, :map}, params) do
     with value when is_binary(value) <- Map.get(params, key),
-         {:ok, json} <- Poison.decode(value) do
+         {:ok, json} <- Jason.decode(value) do
       Map.put(params, key, json)
     else
       _ ->

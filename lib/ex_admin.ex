@@ -328,7 +328,14 @@ defmodule ExAdmin do
   def action_button(conn, defn, name, _page, action, actions, id \\ nil) do
     if action in actions do
       if ExAdmin.Utils.authorized_action?(conn, action, defn) do
-        action_name = defn.action_labels[action] || humanize(action)
+        action_name = 
+          case defn.action_labels[action] do
+            nil ->
+              txt = humanize(action)
+              Gettext.gettext(ExAdmin.Gettext, txt)
+            txt ->
+              txt
+          end
         [action_link(conn, "#{action_name} #{name}", action, id)]
       else
         []

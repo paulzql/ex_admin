@@ -983,7 +983,7 @@ defmodule ExAdmin.Form do
     name = "#{model_name}[#{field_name}]#{inx}[#{field}]"
     label = humanize field
     theme_module(conn, Form).build_map(id, label, index, error, fn class ->
-      data = (data && Poison.encode!(data)) || ""
+      data = (data && Jason.encode!(data)) || ""
       markup do
         Xain.textarea(data, class: class <> " auto-height", id: id, name: name)
         build_errors(errors, nil)

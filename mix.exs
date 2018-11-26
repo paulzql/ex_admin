@@ -31,7 +31,7 @@ defmodule ExAdmin.Mixfile do
     [:plug, :cowboy | applications(:prod)]
   end
   defp applications(_) do
-    [:gettext, :phoenix, :ecto, :inflex, :scrivener, :scrivener_ecto, :csvlixir, :logger, :ex_queb, :xain]
+    [:gettext, :phoenix, :ecto, :inflex, :scrivener, :scrivener_ecto, :csvlixir, :logger, :xain]
   end
   defp elixirc_paths(:test), do: ["lib", "web", "test/support"]
   defp elixirc_paths(_),     do: ["lib", "web"]
@@ -39,23 +39,23 @@ defmodule ExAdmin.Mixfile do
   defp deps do
     [
       {:decimal, "~> 1.4"},
-      {:phoenix, "~> 1.3.1"},
-      {:phoenix_html, "~> 2.10"},
-      {:ecto, "~> 2.1"},
-      {:phoenix_ecto, "~> 3.2"},
-      {:postgrex, "~> 0.13", only: :test},
-      {:floki, "~> 0.8", only: :test},
-      {:cowboy, "~> 1.0"},
-      {:inflex, "~> 1.9"},
-      {:scrivener_ecto, "~> 1.3"},
+      {:plug_cowboy, "~> 2.0"},
+      {:jason, "~> 1.0"},
+      {:phoenix, "~> 1.4"},
+      {:phoenix_html, "~> 2.12"},
+      {:ecto_sql, "~> 3.0"},
+      {:phoenix_ecto, "~> 4.0"},
+      {:postgrex, "~> 0.14", only: :test},
+      {:floki, "~> 0.20", only: :test},
+      {:inflex, "~> 1.10"},
+      {:scrivener_ecto, "~> 2.0"},
       {:xain, github: "paulzql/xain"},
-      {:csvlixir, "~> 2.0.0"},
-      {:exactor, "~> 2.2.4"},
-      {:ex_doc, "~> 0.11", only: :dev},
-      {:earmark, "~> 0.1", only: :dev},
-      {:ex_queb, "~> 1.0"},
-      {:excoveralls, "~> 0.5", only: :test},
-      {:gettext, "~> 0.15"},
+      {:csvlixir, "~> 2.0.4"},
+      {:exactor, "~> 2.2"},
+      {:ex_doc, "~> 0.19", only: :dev},
+      {:earmark, "~> 1.3", only: :dev},
+      {:excoveralls, "~> 0.10", only: :test},
+      {:gettext, "~> 0.16"},
       {:hound, "~> 1.0", only: :test}
     ]
   end
