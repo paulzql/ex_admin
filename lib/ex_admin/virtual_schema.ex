@@ -30,7 +30,7 @@ defmodule ExAdmin.VirtualSchema do
   @callback admin_delete(entity :: Ecto.Schema.t) :: Any
 
 
-  def paginate(%Ecto.Query{from: {_, model}}=query, options) do
+  def paginate(%Ecto.Query{from: %Ecto.Query.FromExpr{source: {_, model}}}=query, options) do
     %Scrivener.Config{page_size: page_size, page_number: page_number} =
       Scrivener.Config.new(__MODULE__, model.virtual_schema_config(), options)
 
@@ -53,7 +53,7 @@ defmodule ExAdmin.VirtualSchema do
   def is_virtual(%Ecto.Changeset{data: %{__struct__: model}}) do
     is_virtual(model)
   end
-  def is_virtual(%Ecto.Query{from: {_, model}}) do
+  def is_virtual(%Ecto.Query{from: %Ecto.Query.FromExpr{source: {_, model}}}) do
     is_virtual(model)
   end
   def is_virtual(%{__struct__: model}) when is_atom(model) do

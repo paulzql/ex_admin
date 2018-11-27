@@ -28,7 +28,7 @@ defmodule ExAdmin.Query do
       {_, _, params} when is_list(params) ->
         ExAdmin.VirtualSchema.paginate(query, id)
       _ ->
-        %Ecto.Query{from: {_, model}} = query
+        %Ecto.Query{from: %Ecto.Query.FromExpr{source: {_, model}}} = query
         ExAdmin.VirtualSchema.get(model, id)
     end
   end
