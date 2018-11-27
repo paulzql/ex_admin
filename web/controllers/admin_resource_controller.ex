@@ -269,7 +269,10 @@ defmodule ExAdmin.AdminResourceController do
   end
 
   defp parse(defn, params) do
-    defn.resource_model.__schema__(:types)
+    defn.resource_model.__schema__(:fields)
+    |> Enum.map(fn field ->
+      {field, defn.resource_model.__schema__(:type, field)}
+    end)
     |> Enum.reduce(params[defn.resource_name], &filter_map/2)
   end
 
