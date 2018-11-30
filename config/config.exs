@@ -39,8 +39,8 @@ config :ex_admin,
   module: ExAdmin
 
 config :phoenix, :template_engines,
-          haml: PhoenixHaml.Engine,
-          eex: Phoenix.Template.EExEngine
+    haml: PhoenixHaml.Engine,
+    eex: Phoenix.Template.EExEngine
 config :phoenix, :json_library, Jason
 
 # Sample configuration:
@@ -56,4 +56,4 @@ config :phoenix, :json_library, Jason
 # Configuration from the imported file will override the ones defined
 # here (which is why it is important to import them last).
 #
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"
