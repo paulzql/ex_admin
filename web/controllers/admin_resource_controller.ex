@@ -211,7 +211,7 @@ defmodule ExAdmin.AdminResourceController do
     conn
     |> put_resp_content_type("text/csv")
     |> put_resp_header("Content-Disposition", "inline; filename=\"#{params[:resource]}.csv\"")
-    |> send_resp(conn.status || 200, csv)
+    |> send_csv(conn.status || 200, csv)
   end
 
   # Can't remember why this is here
@@ -286,4 +286,15 @@ defmodule ExAdmin.AdminResourceController do
     end
   end
   defp filter_map(_, params), do: params
+
+  defp send_csv(conn, status, csv) do
+    Enum.reduce_while(csv, Plug.Conn.send_chunked(conn, status), fn row, conn ->
+      case Plug.Conn.chunk(conn, row) do
+        {:ok, conn} ->
+          {:cont, conn}
+        {:error, :closed} ->
+          {:halt, conn}
+      end
+    end)
+  end
 end
