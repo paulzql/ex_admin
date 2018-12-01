@@ -24,7 +24,7 @@ defmodule ExAdmin.Theme.AdminLte2.Table do
   def theme_attributes_table(conn, resource, schema, resource_model) do
     div ".box" do
       div ".box-header.with-border"  do
-        h3(schema[:name] || (gettext "%{resource_model} Details", resource_model: Utils.humanize resource_model))
+        h3(schema[:name] || (gettext "%{resource_model} Details", resource_model: ExAdmin.Utils.get_resource_label(conn)))
       end
       div ".box-body" do
         do_attributes_table_for(conn, resource, resource_model, schema, @table_opts)

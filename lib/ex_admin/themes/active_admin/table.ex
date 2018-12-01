@@ -18,7 +18,7 @@ defmodule ExAdmin.Theme.ActiveAdmin.Table do
 
   def theme_attributes_table(conn, resource, schema, resource_model) do
     div(".panel") do
-      h3(schema[:name] || (gettext "%{resource_model} Details", resource_model: Utils.humanize resource_model))
+      h3(schema[:name] || (gettext "%{resource_model} Details", resource_model: ExAdmin.Utils.get_resource_label(conn)))
       do_attributes_table_for(conn, resource, resource_model, schema, @table_opts)
     end
   end
