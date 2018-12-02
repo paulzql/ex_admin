@@ -391,7 +391,7 @@ define a virtual schema which not from database. just `use ExAdmin.VirtualSchema
 
 example:
 
-```
+```elixir
 defmodule AdminTest.Bot do
   use Ecto.Schema
   import Ecto.Changeset
@@ -427,11 +427,11 @@ end
 
 define data after change callback (not effect on `VirtualSchema` changes)
 
-```
+```elixir
 config :ex_admin, :change_callback, {MyModel, :on_change}
 ```
 
-```
+```elixir
 defmodule MyModel do
  def on_change(:insert, changeset, data), do: :ok
  def on_change(:update, changeset, data), do: :ok

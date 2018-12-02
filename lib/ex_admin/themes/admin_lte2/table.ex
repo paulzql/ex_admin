@@ -3,7 +3,7 @@ defmodule ExAdmin.Theme.AdminLte2.Table do
   # import Phoenix.HTML.Tag, only: [content_tag: 2, content_tag: 3]
   import ExAdmin.Table
   import ExAdmin.Gettext
-  alias ExAdmin.Utils
+  #alias ExAdmin.Utils
   use Xain
 
   @table_opts [class: "table"]

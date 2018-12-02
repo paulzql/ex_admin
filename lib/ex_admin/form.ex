@@ -93,6 +93,7 @@ defmodule ExAdmin.Form do
         end
         inputs "Statistics" do
           input user, :stats, schema: [age: :integer, height: :string, birthday: :string]
+          input user, :stats2, schema: [age: {:integer, "age label"}, height: {:string, "Height"}]
         end
       end
 
@@ -661,7 +662,7 @@ defmodule ExAdmin.Form do
         errors = get_errors(error, field_name)
         label = get_label(field_name, opts)
         required = if field_name in (conn.assigns[:ea_required] || []), do: true, else: false
-      {html, _id} = wrap_item(resource, field_name, model_name, label, errors, opts, conn.params, required, fn(ext_name) ->
+        {html, _id} = wrap_item(resource, field_name, model_name, label, errors, opts, conn.params, required, fn(ext_name) ->
             [
               build_control(:map, resource, opts, model_name, field_name, ext_name),
               build_errors(errors, opts[:hint])
@@ -973,7 +974,10 @@ defmodule ExAdmin.Form do
   end
 
   def build_input(conn, type, field, field_name, data, model_name, errors \\ nil, index \\ nil)
-  def build_input(conn, :map, field, field_name, data, model_name, errors, index) do
+  def build_input(conn, type, field, field_name, data, model_name, errors, index) when is_atom(type) do
+    build_input(conn, {type, humanize(field)}, field, field_name, data, model_name, errors, index)
+  end
+  def build_input(conn, {:map, label}, field, field_name, data, model_name, errors, index) do
     error = if errors in [nil, [], false], do: "", else: ".has-error"
     {inx, id} = if is_nil(index) do
       {"", "#{model_name}_#{field_name}_#{field}"}
@@ -981,7 +985,6 @@ defmodule ExAdmin.Form do
       {"[#{index}]", "#{model_name}_#{field_name}_#{index}_#{field}"}
     end
     name = "#{model_name}[#{field_name}]#{inx}[#{field}]"
-    label = humanize field
     theme_module(conn, Form).build_map(id, label, index, error, fn class ->
       data = (data && Jason.encode!(data)) || ""
       markup do
@@ -990,7 +993,7 @@ defmodule ExAdmin.Form do
       end
     end)
   end
-  def build_input(conn, type, field, field_name, data, model_name, errors, index) do
+  def build_input(conn, {type, label}, field, field_name, data, model_name, errors, index) do
     field = to_string field
     error = if errors in [nil, [], false], do: "", else: ".has-error"
     {inx, id} = if is_nil(index) do
@@ -999,7 +1002,6 @@ defmodule ExAdmin.Form do
       {"[#{index}]", "#{model_name}_#{field_name}_#{index}_#{field}"}
     end
     name = "#{model_name}[#{field_name}]#{inx}[#{field}]"
-    label = humanize field
     theme_module(conn, Form).build_map(id, label, index, error, fn class ->
         markup do
           []
@@ -1007,7 +1009,12 @@ defmodule ExAdmin.Form do
           |> Keyword.put(:class, class)
           |> Keyword.put(:id, id)
           |> Keyword.put(:name, name)
-          |> Keyword.put(:value, data[field])
+          |> case do
+            opts when type == :checkbox ->
+              Keyword.put(opts, :checked, "checked")
+            opts ->
+              Keyword.put(opts, :value, data[field])
+          end
           |> Xain.input
           build_errors(errors, nil)
         end
@@ -1016,6 +1023,7 @@ defmodule ExAdmin.Form do
 
   defp input_type(:string), do: "text"
   defp input_type(:integer), do: "number"
+  defp input_type(:checkbox), do: "checkbox"
   defp input_type(_), do: "text"
 
   @doc false

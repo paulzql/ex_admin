@@ -2,7 +2,7 @@ defmodule ExAdmin.Theme.ActiveAdmin.Table do
   @moduledoc false
   import ExAdmin.Table
   import ExAdmin.Gettext
-  alias ExAdmin.Utils
+  #alias ExAdmin.Utils
   use Xain
 
   @table_opts [border: "0", cellspacing: "0", cellpadding: "0"]
