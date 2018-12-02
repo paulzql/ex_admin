@@ -1006,14 +1006,18 @@ defmodule ExAdmin.Form do
         markup do
           []
           |> Keyword.put(:type, input_type(type))
-          |> Keyword.put(:class, class)
           |> Keyword.put(:id, id)
           |> Keyword.put(:name, name)
           |> case do
             opts when type == :checkbox ->
-              Keyword.put(opts, :checked, "checked")
+              if data[field] == true do
+                Keyword.put(opts, :checked, "checked")
+              else
+                opts
+              end
             opts ->
-              Keyword.put(opts, :value, data[field])
+              Keyword.put(opts, :class, class)
+              |> Keyword.put(:value, data[field])
           end
           |> Xain.input
           build_errors(errors, nil)
