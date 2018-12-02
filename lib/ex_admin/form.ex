@@ -1010,10 +1010,15 @@ defmodule ExAdmin.Form do
           |> Keyword.put(:name, name)
           |> case do
             opts when type == :checkbox ->
-              if data[field] == true do
-                Keyword.put(opts, :checked, "checked")
-              else
-                opts
+              case data[field] do
+                true ->
+                  Keyword.put(opts, :checked, "checked")
+                "on" ->
+                  Keyword.put(opts, :checked, "checked")
+                "true" ->
+                  Keyword.put(opts, :checked, "checked")
+                _ ->
+                  opts
               end
             opts ->
               Keyword.put(opts, :class, class)
