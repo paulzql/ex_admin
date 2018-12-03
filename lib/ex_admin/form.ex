@@ -92,8 +92,9 @@ defmodule ExAdmin.Form do
           input user, :name
         end
         inputs "Statistics" do
-          input user, :stats, schema: [age: :integer, height: :string, birthday: :string]
-          input user, :stats2, schema: [age: {:integer, "age label"}, height: {:string, "Height"}]
+          input user, :stats, schema: [age: :integer, is_adult: :boolean, birthday: :string]
+          input user, :stats2, schema: [age: [type: :integer, label: "age label"]}, height: :integer]
+          input user, :profile, schema: [gender: [type: :list, label: "Genders", collection: ["male", "female"]]}]
         end
       end
 
@@ -975,9 +976,12 @@ defmodule ExAdmin.Form do
 
   def build_input(conn, type, field, field_name, data, model_name, errors \\ nil, index \\ nil)
   def build_input(conn, type, field, field_name, data, model_name, errors, index) when is_atom(type) do
-    build_input(conn, {type, humanize(field)}, field, field_name, data, model_name, errors, index)
+    build_input(conn, {type, humanize(field), []}, field, field_name, data, model_name, errors, index)
   end
-  def build_input(conn, {:map, label}, field, field_name, data, model_name, errors, index) do
+  def build_input(conn, opts, field, field_name, data, model_name, errors, index) when is_list(opts) do
+    build_input(conn, {opts[:type], opts[:label] || humanize(field), opts}, field, field_name, data, model_name, errors, index)
+  end
+  def build_input(conn, {type, label, opts}, field, field_name, data, model_name, errors, index) do
     error = if errors in [nil, [], false], do: "", else: ".has-error"
     {inx, id} = if is_nil(index) do
       {"", "#{model_name}_#{field_name}_#{field}"}
@@ -986,53 +990,120 @@ defmodule ExAdmin.Form do
     end
     name = "#{model_name}[#{field_name}]#{inx}[#{field}]"
     theme_module(conn, Form).build_map(id, label, index, error, fn class ->
-      data = (data && Jason.encode!(data)) || ""
-      markup do
-        Xain.textarea(data, class: class <> " auto-height", id: id, name: name)
-        build_errors(errors, nil)
-      end
+      build_input(type, data, field, [{:id, id}, {:name, name}, {:class, class} |opts], errors)
     end)
   end
-  def build_input(conn, {type, label}, field, field_name, data, model_name, errors, index) do
-    field = to_string field
-    error = if errors in [nil, [], false], do: "", else: ".has-error"
-    {inx, id} = if is_nil(index) do
-      {"", "#{model_name}_#{field_name}_#{field}"}
-    else
-      {"[#{index}]", "#{model_name}_#{field_name}_#{index}_#{field}"}
-    end
-    name = "#{model_name}[#{field_name}]#{inx}[#{field}]"
-    theme_module(conn, Form).build_map(id, label, index, error, fn class ->
-        markup do
-          []
-          |> Keyword.put(:type, input_type(type))
-          |> Keyword.put(:id, id)
-          |> Keyword.put(:name, name)
-          |> case do
-            opts when type == :checkbox ->
-              case data[field] do
-                true ->
-                  Keyword.put(opts, :checked, "checked")
-                "on" ->
-                  Keyword.put(opts, :checked, "checked")
-                "true" ->
-                  Keyword.put(opts, :checked, "checked")
-                _ ->
-                  opts
-              end
-            opts ->
-              Keyword.put(opts, :class, class)
-              |> Keyword.put(:value, data[field])
+  def build_input(:list, data, field, opts, errors) do
+    markup do
+      select(".form-control", [id: opts[:id], name: opts[:name]]) do
+        option("", value: "")
+        for item <- opts[:collection] do
+          {value, name} = case item do
+            {value, name} -> {value, name}
+            other -> {other, other}
           end
-          |> Xain.input
-          build_errors(errors, nil)
+          opts = if data[field] == value,
+            do: [value: value, selected: :selected], else: [value: value]
+          option(name, opts)
         end
-    end)
+      end
+      build_errors(errors, nil)
+    end
   end
+  def build_input(:map, data, _field, opts, errors) do
+    data = (data && Jason.encode!(data)) || ""
+    markup do
+      Xain.textarea(data, class: opts[:class] <> " auto-height", id: opts[:id], name: opts[:name])
+      build_errors(errors, nil)
+    end
+  end
+  def build_input(:boolean, data, field, opts, errors) do
+    markup do
+      case data[field] do
+        true ->
+          [checked: "checked"]
+        "on" ->
+          [checked: "checked"]
+        "true" ->
+          [checked: "checked"]
+        _ ->
+          []
+      end
+      |> Keyword.put(:type, "checkbox")
+      |> Keyword.put(:id, opts[:id])
+      |> Keyword.put(:name, opts[:name])
+      |> Xain.input
+      build_errors(errors, nil)
+    end
+  end
+  def build_input(type, data, field, opts, errors) do
+    markup do
+      []
+      |> Keyword.put(:type, input_type(type))
+      |> Keyword.put(:id, opts[:id])
+      |> Keyword.put(:name, opts[:name])
+      |> Keyword.put(:class, opts[:class])
+      |> Keyword.put(:value, data[field])
+      |> Xain.input
+      build_errors(errors, nil)
+    end
+  end
+  # def build_input(conn, {:map, label}, field, field_name, data, model_name, errors, index) do
+  #   error = if errors in [nil, [], false], do: "", else: ".has-error"
+  #   {inx, id} = if is_nil(index) do
+  #     {"", "#{model_name}_#{field_name}_#{field}"}
+  #   else
+  #     {"[#{index}]", "#{model_name}_#{field_name}_#{index}_#{field}"}
+  #   end
+  #   name = "#{model_name}[#{field_name}]#{inx}[#{field}]"
+  #   theme_module(conn, Form).build_map(id, label, index, error, fn class ->
+  #     data = (data && Jason.encode!(data)) || ""
+  #     markup do
+  #       Xain.textarea(data, class: class <> " auto-height", id: id, name: name)
+  #       build_errors(errors, nil)
+  #     end
+  #   end)
+  # end
+  # def build_input(conn, {type, label}, field, field_name, data, model_name, errors, index) do
+  #   field = to_string field
+  #   error = if errors in [nil, [], false], do: "", else: ".has-error"
+  #   {inx, id} = if is_nil(index) do
+  #     {"", "#{model_name}_#{field_name}_#{field}"}
+  #   else
+  #     {"[#{index}]", "#{model_name}_#{field_name}_#{index}_#{field}"}
+  #   end
+  #   name = "#{model_name}[#{field_name}]#{inx}[#{field}]"
+  #   theme_module(conn, Form).build_map(id, label, index, error, fn class ->
+  #       markup do
+  #         []
+  #         |> Keyword.put(:type, input_type(type))
+  #         |> Keyword.put(:id, id)
+  #         |> Keyword.put(:name, name)
+  #         |> case do
+  #           opts when type == :boolean ->
+  #             case data[field] do
+  #               true ->
+  #                 Keyword.put(opts, :checked, "checked")
+  #               "on" ->
+  #                 Keyword.put(opts, :checked, "checked")
+  #               "true" ->
+  #                 Keyword.put(opts, :checked, "checked")
+  #               _ ->
+  #                 opts
+  #             end
+  #           opts ->
+  #             Keyword.put(opts, :class, class)
+  #             |> Keyword.put(:value, data[field])
+  #         end
+  #         |> Xain.input
+  #         build_errors(errors, nil)
+  #       end
+  #   end)
+  # end
 
   defp input_type(:string), do: "text"
   defp input_type(:integer), do: "number"
-  defp input_type(:checkbox), do: "checkbox"
+  defp input_type(:boolean), do: "checkbox"
   defp input_type(_), do: "text"
 
   @doc false
