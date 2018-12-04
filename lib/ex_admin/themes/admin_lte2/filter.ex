@@ -61,7 +61,7 @@ defmodule ExAdmin.Theme.AdminLte2.Filter do
       end
   end
 
-  def build_field({name, type}, q, defn) when type in [Ecto.DateTime, Ecto.Date, Ecto.Time, Timex.Ecto.DateTime, Timex.Ecto.Date, Timex.Ecto.Time, Timex.Ecto.DateTimeWithTimezone, NaiveDateTime, :naive_datetime, DateTime, :utc_datetime] do
+  def build_field({name, type}, q, defn) when type in [:time, Time, Timex.Ecto.DateTime,Timex.Ecto.Time, Timex.Ecto.DateTimeWithTimezone, NaiveDateTime, :naive_datetime, DateTime, :utc_datetime] do
     gte_value = get_value("#{name}_gte", q)
     lte_value = get_value("#{name}_lte", q)
     name_label = field_label(name, defn)
@@ -83,6 +83,34 @@ defmodule ExAdmin.Theme.AdminLte2.Filter do
               i ".fa.fa-calendar"
             end
             input class: "datepicker form-control", id: "q_#{name}_lte", max: "10", name: "q[#{name}_lte]", size: "15", type: :text, value: lte_value
+          end
+        end
+      end
+    end
+  end
+
+  def build_field({name, type}, q, defn) when type in [:date, Date, Timex.Ecto.Date] do
+    gte_value = get_value("#{name}_gted", q)
+    lte_value = get_value("#{name}_lted", q)
+    name_label = field_label(name, defn)
+    div ".form-group" do
+      label ".label #{name_label}", for: "q_#{name}_gted"
+      div ".row" do
+        div ".col-xs-6", style: "padding-right: 5px;" do
+          div ".input-group" do
+            div ".input-group-addon" do
+              i ".fa.fa-calendar"
+            end
+            input class: "datepicker form-control", id: "q_#{name}_gted", max: "10", name: "q[#{name}_gted]", size: "15", type: :text, value: gte_value
+          end
+        end
+
+        div ".col-xs-6", style: "padding-left: 5px;" do
+          div ".input-group" do
+            div ".input-group-addon" do
+              i ".fa.fa-calendar"
+            end
+            input class: "datepicker form-control", id: "q_#{name}_lted", max: "10", name: "q[#{name}_lted]", size: "15", type: :text, value: lte_value
           end
         end
       end

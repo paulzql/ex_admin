@@ -35,6 +35,8 @@ defmodule ExQueb do
       builder
       |> build_date_filters(filters, :gte)
       |> build_date_filters(filters, :lte)
+      |> build_date_filters(filters, :gted)
+      |> build_date_filters(filters, :lted)
     end
   
     defp build_integer_filters(builder, filters, condition) do
@@ -67,19 +69,49 @@ defmodule ExQueb do
       |> Enum.filter(& String.match?(elem(&1,0), ~r/_#{condition}$/))
       |> Enum.map(& {String.replace(elem(&1, 0), "_#{condition}", ""), elem(&1, 1)})
       |> Enum.reduce(builder, fn({k,v}, acc) ->
-        _build_date_filter(acc, String.to_atom(k), cast_date_time(v), condition)
+        _build_date_filter(acc, String.to_atom(k), v, condition)
       end)
     end
   
     defp _build_date_filter(query, fld, value, :gte) do
-      where(query, [q], fragment("? >= ?", field(q, ^fld), type(^value, NaiveDateTime)))
+      case cast_date_time(value) do
+        {:ok, datetime} ->
+          where(query, [q], fragment("? >= ?", field(q, ^fld), ^datetime))
+        _ ->
+          query
+      end
     end
     defp _build_date_filter(query, fld, value, :lte) do
-      where(query, [q], fragment("? <= ?", field(q, ^fld), type(^value, NaiveDateTime)))
+      case cast_date_time(value) do
+        {:ok, datetime} ->
+          where(query, [q], fragment("? <= ?", field(q, ^fld), ^datetime))
+        _ ->
+          query
+      end
+    end
+    defp _build_date_filter(query, fld, value, :gted) do
+      case Date.from_iso8601(value) do
+        {:ok, date} ->
+          where(query, [q], fragment("? >= ?", field(q, ^fld), ^date))
+        _ ->
+          query
+      end
+    end
+    defp _build_date_filter(query, fld, value, :lted) do
+      case Date.from_iso8601(value) do
+        {:ok, date} ->
+          where(query, [q], fragment("? <= ?", field(q, ^fld), ^date))
+        _ ->
+          query
+      end
     end
   
     defp cast_date_time(value) do
-        value
+        if String.match?(value, ~r/^\d{4}-\d{2}-\d{2}$/) do
+          NaiveDateTime.from_iso8601("#{value}T00:00:00")
+        else
+          NaiveDateTime.from_iso8601(value)
+        end
     end
   
     @doc """
